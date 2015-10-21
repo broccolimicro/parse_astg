@@ -1,5 +1,5 @@
-SRCDIR       =  parse_dot
-CXXFLAGS	 =  -O2 -g -Wall -fmessage-length=0 -I../parse -I../common
+SRCDIR       =  parse_astg
+CXXFLAGS	 =  -O2 -g -Wall -fmessage-length=0 -I../parse_expression -I../parse_ucs -I../parse -I../common
 SOURCES	    :=  $(shell find $(SRCDIR) -name '*.cpp')
 OBJECTS	    :=  $(SOURCES:%.cpp=%.o)
 TARGET		 =  lib$(SRCDIR).a
