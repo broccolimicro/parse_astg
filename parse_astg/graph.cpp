@@ -9,6 +9,7 @@
 #include "../parse_astg/graph.h"
 #include <parse/default/instance.h>
 #include <parse/default/symbol.h>
+#include <parse/default/number.h>
 #include <parse/default/white_space.h>
 #include <parse/default/new_line.h>
 
@@ -34,190 +35,276 @@ void graph::parse(tokenizer &tokens, void *data)
 {
 	tokens.syntax_start(this);
 
-	tokens.increment(false);
-	tokens.expect(".model");
-
-	if (tokens.decrement(__FILE__, __LINE__, data))
-	{
-		tokens.next();
-
-		tokens.increment(true);
-		tokens.expect("\n");
-
-		tokens.increment(true);
-		tokens.expect<parse::instance>();
-
-		if (tokens.decrement(__FILE__, __LINE__, data))
-			name = tokens.next();
-
-		if (tokens.decrement(__FILE__, __LINE__, data))
-			tokens.next();
-	}
-
 	tokens.increment(true);
-	tokens.expect(".end");
+	tokens.expect(".");
+	tokens.expect("\n");
 
-	tokens.increment(false);
-	tokens.expect(".input");
-	tokens.expect(".output");
-	tokens.expect(".internal");
-	tokens.expect(".dummy");
-	tokens.expect(".graph");
-	tokens.expect(".marking");
-
-	while (tokens.decrement(__FILE__, __LINE__, data))
+	bool done = false;
+	while (!done && tokens.decrement(__FILE__, __LINE__, data))
 	{
-		if (tokens.found(".input"))
+		if (tokens.next() == ".")
 		{
-			tokens.next();
-
-			tokens.increment(true);
-			tokens.expect("\n");
-
 			tokens.increment(false);
-			tokens.expect<variable_name>();
-
-			while (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				inputs.push_back(variable_name(tokens, data));
-
-				tokens.increment(false);
-				tokens.expect<variable_name>();
-			}
+			tokens.expect("model");
+			tokens.expect("input");
+			tokens.expect("output");
+			tokens.expect("internal");
+			tokens.expect("dummy");
+			tokens.expect("predicate");
+			tokens.expect("effective");
+			tokens.expect("graph");
+			tokens.expect("marking");
+			tokens.expect("end");
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
-		}
-		else if (tokens.found(".output"))
-		{
-			tokens.next();
-
-			tokens.increment(true);
-			tokens.expect("\n");
-
-			tokens.increment(false);
-			tokens.expect<variable_name>();
-
-			while (tokens.decrement(__FILE__, __LINE__, data))
 			{
-				internal.push_back(variable_name(tokens, data));
-
-				tokens.increment(false);
-				tokens.expect<variable_name>();
-			}
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
-		}
-		else if (tokens.found(".internal"))
-		{
-			tokens.next();
-
-			tokens.increment(true);
-			tokens.expect("\n");
-
-			tokens.increment(false);
-			tokens.expect<variable_name>();
-
-			while (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				internal.push_back(variable_name(tokens, data));
-
-				tokens.increment(false);
-				tokens.expect<variable_name>();
-			}
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
-		}
-		else if (tokens.found(".dummy"))
-		{
-			tokens.next();
-
-			tokens.increment(true);
-			tokens.expect("\n");
-
-			tokens.increment(false);
-			tokens.expect<variable_name>();
-
-			while (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				dummy.push_back(variable_name(tokens, data));
-
-				tokens.increment(false);
-				tokens.expect<variable_name>();
-			}
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
-		}
-		else if (tokens.found(".graph"))
-		{
-			tokens.next();
-
-			tokens.increment(false);
-			tokens.expect<arc>();
-
-			tokens.increment(true);
-			tokens.expect("\n");
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
-
-			while (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				arcs.push_back(arc(tokens, data));
-
-				tokens.increment(true);
-				tokens.expect("\n");
-
-				if (tokens.decrement(__FILE__, __LINE__, data))
+				if (tokens.found("model"))
+				{
 					tokens.next();
 
-				tokens.increment(false);
-				tokens.expect<arc>();
-			}
-		}
-		else if (tokens.found(".marking"))
-		{
-			tokens.next();
+					tokens.increment(true);
+					tokens.expect<parse::instance>();
 
-			tokens.increment(true);
-			tokens.expect("\n");
-
-			tokens.increment(true);
-			tokens.expect("{");
-
-			while (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				tokens.next();
-				vector<node> nodes;
-
-				tokens.increment(true);
-				tokens.expect("}");
-
-				tokens.increment(false);
-				tokens.expect<node>();
-
-				while (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						name = tokens.next();
+				}
+				if (tokens.found("input"))
 				{
-					nodes.push_back(node(tokens, data));
+					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<node>();
-				}
+					tokens.expect<variable_name>();
 
-				if (tokens.decrement(__FILE__, __LINE__, data))
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						inputs.push_back(variable_name(tokens, data));
+
+						tokens.increment(false);
+						tokens.expect<variable_name>();
+					}
+				}
+				else if (tokens.found("output"))
+				{
 					tokens.next();
 
-				marking.push_back(nodes);
+					tokens.increment(false);
+					tokens.expect<variable_name>();
 
-				tokens.increment(false);
-				tokens.expect("{");
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						internal.push_back(variable_name(tokens, data));
+
+						tokens.increment(false);
+						tokens.expect<variable_name>();
+					}
+				}
+				else if (tokens.found("internal"))
+				{
+					tokens.next();
+
+					tokens.increment(false);
+					tokens.expect<variable_name>();
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						internal.push_back(variable_name(tokens, data));
+
+						tokens.increment(false);
+						tokens.expect<variable_name>();
+					}
+				}
+				else if (tokens.found("dummy"))
+				{
+					tokens.next();
+
+					tokens.increment(false);
+					tokens.expect<parse::instance>();
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						dummy.push_back(tokens.next());
+
+						tokens.increment(false);
+						tokens.expect("/");
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+						{
+							tokens.next();
+
+							tokens.increment(true);
+							tokens.expect<parse::number>();
+
+							if (tokens.decrement(__FILE__, __LINE__, data))
+								dummy.back() += "/" + tokens.next();
+						}
+
+						tokens.increment(false);
+						tokens.expect<parse::instance>();
+					}
+				}
+				else if (tokens.found("predicate"))
+				{
+					tokens.next();
+
+					tokens.increment(false);
+					tokens.expect<parse::instance>();
+
+					tokens.increment(true);
+					tokens.expect("\n");
+
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						tokens.next();
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						predicate.push_back(pair<node, parse_expression::expression>(node(tokens, dummy, data), parse_expression::expression()));
+
+						tokens.increment(false);
+						tokens.expect<parse::instance>();
+
+						tokens.increment(true);
+						tokens.expect("\n");
+
+						tokens.increment(true);
+						tokens.expect<parse_expression::expression>();
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+							predicate.back().second = parse_expression::expression(tokens, 0, data);
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+							tokens.next();
+					}
+				}
+				else if (tokens.found("effective"))
+				{
+					tokens.next();
+
+					tokens.increment(false);
+					tokens.expect<parse::instance>();
+
+					tokens.increment(true);
+					tokens.expect("\n");
+
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						tokens.next();
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						effective.push_back(pair<node, parse_expression::expression>(node(tokens, dummy, data), parse_expression::expression()));
+
+						tokens.increment(false);
+						tokens.expect<parse::instance>();
+
+						tokens.increment(true);
+						tokens.expect("\n");
+
+						tokens.increment(true);
+						tokens.expect<parse_expression::expression>();
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+							effective.back().second = parse_expression::expression(tokens, 0, data);
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+							tokens.next();
+					}
+				}
+				else if (tokens.found("graph"))
+				{
+					tokens.next();
+
+					tokens.increment(false);
+					tokens.expect<arc>();
+
+					tokens.increment(true);
+					tokens.expect("\n");
+
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						tokens.next();
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						arcs.push_back(arc(tokens, dummy, data));
+
+						tokens.increment(true);
+						tokens.expect("\n");
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+							tokens.next();
+
+						tokens.increment(false);
+						tokens.expect<arc>();
+					}
+				}
+				else if (tokens.found("marking"))
+				{
+					tokens.next();
+
+					tokens.increment(true);
+					tokens.expect("{");
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						tokens.next();
+
+						tokens.increment(true);
+						tokens.expect("}");
+
+						tokens.increment(false);
+						tokens.expect("[");
+
+						pair<parse_expression::expression, vector<node> > mark;
+						if (tokens.decrement(__FILE__, __LINE__, data))
+						{
+							tokens.next();
+
+							tokens.increment(true);
+							tokens.expect("]");
+
+							tokens.increment(true);
+							tokens.expect<parse_expression::expression>();
+
+							if (tokens.decrement(__FILE__, __LINE__, data))
+								mark.first = parse_expression::expression(tokens, 0, data);
+
+							if (tokens.decrement(__FILE__, __LINE__, data))
+								tokens.next();
+						}
+
+						tokens.increment(false);
+						tokens.expect<node>();
+
+						while (tokens.decrement(__FILE__, __LINE__, data))
+						{
+							mark.second.push_back(node(tokens, dummy, data));
+
+							tokens.increment(false);
+							tokens.expect<node>();
+						}
+
+						if (tokens.decrement(__FILE__, __LINE__, data))
+							tokens.next();
+
+						marking.push_back(mark);
+
+						tokens.increment(false);
+						tokens.expect("{");
+					}
+				}
+				else if (tokens.found("end"))
+				{
+					tokens.next();
+					done = true;
+				}
 			}
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
+			else while (tokens.peek(1) != "." && tokens.peek(1) != "")
 				tokens.next();
+		}
+
+		if (!done)
+		{
+			tokens.increment(true);
+			tokens.expect(".");
+			tokens.expect("\n");
 		}
 	}
 
@@ -226,13 +313,19 @@ void graph::parse(tokenizer &tokens, void *data)
 
 bool graph::is_next(tokenizer &tokens, int i, void *data)
 {
-	return (tokens.is_next(".model") ||
-			tokens.is_next(".input") ||
-			tokens.is_next(".output") ||
-			tokens.is_next(".internal") ||
-			tokens.is_next(".dummy") ||
-			tokens.is_next(".graph") ||
-			tokens.is_next(".end"));
+	while (tokens.is_next("\n", i))
+		i++;
+
+	return tokens.is_next(".", i) &&
+			(tokens.is_next("model", i+1) ||
+			tokens.is_next("input", i+1) ||
+			tokens.is_next("output", i+1) ||
+			tokens.is_next("internal", i+1) ||
+			tokens.is_next("dummy", i+1) ||
+			tokens.is_next("predicate", i+1) ||
+			tokens.is_next("effective", i+1) ||
+			tokens.is_next("graph", i+1) ||
+			tokens.is_next("end", i+1));
 }
 
 void graph::register_syntax(tokenizer &tokens)
@@ -244,6 +337,7 @@ void graph::register_syntax(tokenizer &tokens)
 		node::register_syntax(tokens);
 		tokens.register_token<parse::instance>();
 		tokens.register_token<parse::symbol>();
+		tokens.register_token<parse::number>();
 		tokens.register_token<parse::white_space>(false);
 		tokens.register_token<parse::new_line>();
 	}
@@ -260,6 +354,7 @@ string graph::to_string(string tab) const
 		result += ".input";
 		for (int i = 0; i < (int)inputs.size(); i++)
 			result += " " + inputs[i].to_string(tab);
+		result += "\n";
 	}
 
 	if (outputs.size() > 0)
@@ -267,6 +362,7 @@ string graph::to_string(string tab) const
 		result += ".output";
 		for (int i = 0; i < (int)outputs.size(); i++)
 			result += " " + outputs[i].to_string(tab);
+		result += "\n";
 	}
 
 	if (internal.size() > 0)
@@ -274,13 +370,29 @@ string graph::to_string(string tab) const
 		result += ".internal";
 		for (int i = 0; i < (int)internal.size(); i++)
 			result += " " + internal[i].to_string(tab);
+		result += "\n";
 	}
 
 	if (dummy.size() > 0)
 	{
 		result += ".dummy";
 		for (int i = 0; i < (int)dummy.size(); i++)
-			result += " " + dummy[i].to_string(tab);
+			result += " " + dummy[i];
+		result += "\n";
+	}
+
+	if (predicate.size() > 0)
+	{
+		result += ".predicate\n";
+		for (int i = 0; i < (int)predicate.size(); i++)
+			result += predicate[i].first.to_string() + " " + predicate[i].second.to_string() + "\n";
+	}
+
+	if (effective.size() > 0)
+	{
+		result += ".effective\n";
+		for (int i = 0; i < (int)effective.size(); i++)
+			result += effective[i].first.to_string() + " " + effective[i].second.to_string() + "\n";
 	}
 
 	result += ".graph\n";
@@ -293,12 +405,15 @@ string graph::to_string(string tab) const
 		for (int i = 0; i < (int)marking.size(); i++)
 		{
 			result += " {";
-			for (int j = 0; j < (int)marking[i].size(); j++)
+			if (marking[i].first.valid)
+				result += "[" + marking[i].first.to_string(tab) + "] ";
+
+			for (int j = 0; j < (int)marking[i].second.size(); j++)
 			{
 				if (j != 0)
 					result += " ";
 
-				result += marking[i][j].to_string(tab);
+				result += marking[i].second[j].to_string(tab);
 			}
 			result += "}";
 		}

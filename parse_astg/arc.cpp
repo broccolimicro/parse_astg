@@ -18,17 +18,24 @@ arc::arc()
 	debug_name = "arc";
 }
 
-arc::arc(tokenizer &tokens, void *data)
+arc::arc(tokenizer &tokens, vector<string> dummies, void *data)
 {
 	debug_name = "arc";
-	parse(tokens, data);
+	parse(tokens, dummies, data);
+}
+
+arc::arc(node n0, node n1)
+{
+	debug_name = "src";
+	nodes.push_back(n0);
+	nodes.push_back(n1);
 }
 
 arc::~arc()
 {
 }
 
-void arc::parse(tokenizer &tokens, void *data)
+void arc::parse(tokenizer &tokens, vector<string> dummies, void *data)
 {
 	tokens.syntax_start(this);
 
@@ -37,7 +44,7 @@ void arc::parse(tokenizer &tokens, void *data)
 
 	for (int i = 0; tokens.decrement(__FILE__, __LINE__, data); i++)
 	{
-		nodes.push_back(node(tokens, data));
+		nodes.push_back(node(tokens, dummies, data));
 
 		tokens.increment(i == 0);
 		tokens.expect<node>();
