@@ -197,6 +197,8 @@ string node::to_string(string tab) const
 		result += "[" + guard.to_string(tab) + "]";
 	else if (place != "")
 		result += place;
+	else
+		result += "skip";
 
 	if (id != "")
 		result += "/" + id;
