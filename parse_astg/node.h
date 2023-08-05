@@ -7,7 +7,7 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <parse_expression/assignment.h>
+#include <parse_expression/composition.h>
 #include <parse_expression/expression.h>
 
 #ifndef parse_astg_node_h
@@ -20,12 +20,11 @@ struct node : parse::syntax
 {
 	node();
 	node(tokenizer &tokens, vector<string> dummies, void *data = NULL);
-	node(parse_expression::assignment assign, string id = "");
-	node(parse_expression::expression guard, string id = "");
+	node(parse_expression::expression guard, parse_expression::composition assign, string id = "");
 	node(string place, string id = "");
 	~node();
 
-	parse_expression::assignment assign;
+	parse_expression::composition assign;
 	parse_expression::expression guard;
 	string place;
 	string id;

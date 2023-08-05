@@ -27,19 +27,12 @@ node::node(tokenizer &tokens, vector<string> dummies, void *data)
 	parse(tokens, dummies, data);
 }
 
-node::node(parse_expression::assignment assign, string id)
-{
-	debug_name = "node";
-	place = "";
-	this->assign = assign;
-	this->id = id;
-}
-
-node::node(parse_expression::expression guard, string id)
+node::node(parse_expression::expression guard, parse_expression::composition assign, string id)
 {
 	debug_name = "node";
 	place = "";
 	this->guard = guard;
+	this->assign = assign;
 	this->id = id;
 }
 
@@ -69,102 +62,41 @@ void node::parse(tokenizer &tokens, vector<string> dummies, void *data)
 
 	if (is_place || is_dummy)
 		tokens.expect<parse::instance>();
-	else
-	{
-		tokens.expect<parse_expression::assignment>();
-		tokens.expect("[");
+	else {
+		tokens.expect<parse_expression::composition>();
+		tokens.increment(true);
+		tokens.expect("->");
+		tokens.increment(true);
+		tokens.expect<parse_expression::expression>();
 	}
 
 	if (tokens.decrement(__FILE__, __LINE__, data))
 	{
-		if (tokens.found<parse_expression::assignment>())
-		{
-			assign = parse_expression::assignment(tokens, data);
-
-			tokens.increment(false);
-			tokens.expect("/");
+		if (tokens.found<parse_expression::expression>()) {
+			guard = parse_expression::expression(tokens, 0, data);
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
-			{
 				tokens.next();
 
-				tokens.increment(true);
-				tokens.expect<parse::number>();
-
-				if (tokens.decrement(__FILE__, __LINE__, data))
-					id = tokens.next();
-			}
+			if (tokens.decrement(__FILE__, __LINE__, data))
+				assign = parse_expression::composition(tokens, 0, data);
+		} else if (is_place && tokens.found<parse::instance>()) {
+			place = tokens.next();
+		} else if (is_dummy && tokens.found<parse::instance>()) {
+			// skip
 		}
-		else if (tokens.found("["))
-		{
+
+		tokens.increment(false);
+		tokens.expect("/");
+
+		if (tokens.decrement(__FILE__, __LINE__, data)) {
 			tokens.next();
 
 			tokens.increment(true);
-			tokens.expect("]");
-
-			tokens.increment(true);
-			tokens.expect<parse_expression::expression>();
+			tokens.expect<parse::number>();
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
-				guard = parse_expression::expression(tokens, 0, data);
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
-
-			tokens.increment(false);
-			tokens.expect("/");
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				tokens.next();
-
-				tokens.increment(true);
-				tokens.expect<parse::number>();
-
-				if (tokens.decrement(__FILE__, __LINE__, data))
-					id = tokens.next();
-			}
-		}
-		else if (is_place && tokens.found<parse::instance>())
-		{
-			place = tokens.next();
-
-			tokens.increment(false);
-			tokens.expect("/");
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				tokens.next();
-
-				tokens.increment(true);
-				tokens.expect<parse::number>();
-
-				if (tokens.decrement(__FILE__, __LINE__, data))
-					id = tokens.next();
-			}
-		}
-		else if (is_dummy && tokens.found<parse::instance>())
-		{
-			assign.valid = true;
-			assign.names.resize(1);
-			assign.names[0].valid = true;
-			assign.names[0].names.resize(1);
-			assign.names[0].names[0].valid = true;
-			assign.names[0].names[0].name = tokens.next();
-
-			tokens.increment(false);
-			tokens.expect("/");
-
-			if (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				tokens.next();
-
-				tokens.increment(true);
-				tokens.expect<parse::number>();
-
-				if (tokens.decrement(__FILE__, __LINE__, data))
-					id = tokens.next();
-			}
+				id = tokens.next();
 		}
 	}
 
@@ -173,7 +105,7 @@ void node::parse(tokenizer &tokens, vector<string> dummies, void *data)
 
 bool node::is_next(tokenizer &tokens, int i, void *data)
 {
-	return (tokens.is_next("[", i) || parse_expression::assignment::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
+	return (parse_expression::expression::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
 }
 
 void node::register_syntax(tokenizer &tokens)
@@ -181,7 +113,7 @@ void node::register_syntax(tokenizer &tokens)
 	if (!tokens.syntax_registered<node>())
 	{
 		tokens.register_syntax<node>();
-		parse_expression::assignment::register_syntax(tokens);
+		parse_expression::composition::register_syntax(tokens);
 		parse_expression::expression::register_syntax(tokens);
 		tokens.register_token<parse::instance>();
 		tokens.register_token<parse::symbol>();
@@ -191,14 +123,12 @@ void node::register_syntax(tokenizer &tokens)
 string node::to_string(string tab) const
 {
 	string result = "";
-	if (assign.valid)
-		result += assign.to_string(tab);
-	else if (guard.valid)
-		result += "[" + guard.to_string(tab) + "]";
+	if (guard.valid && assign.valid)
+		result += guard.to_string(tab) + "->" + assign.to_string(tab);
 	else if (place != "")
 		result += place;
 	else
-		result += "skip";
+		result += "1->skip";
 
 	if (id != "")
 		result += "/" + id;
