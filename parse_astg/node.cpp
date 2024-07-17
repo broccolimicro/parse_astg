@@ -20,11 +20,11 @@ node::node()
 	place = "";
 }
 
-node::node(tokenizer &tokens, vector<string> dummies, void *data)
+node::node(tokenizer &tokens, void *data)
 {
 	debug_name = "node";
 	place = "";
-	parse(tokens, dummies, data);
+	parse(tokens, data);
 }
 
 node::node(parse_expression::expression guard, parse_expression::composition assign, string id)
@@ -47,7 +47,7 @@ node::~node()
 {
 }
 
-void node::parse(tokenizer &tokens, vector<string> dummies, void *data)
+void node::parse(tokenizer &tokens, void *data)
 {
 	tokens.syntax_start(this);
 
@@ -58,11 +58,12 @@ void node::parse(tokenizer &tokens, vector<string> dummies, void *data)
 		if (peek[i] < '0' || peek[i] > '9')
 			is_place = false;
 
-	bool is_dummy = (find(dummies.begin(), dummies.end(), peek) != dummies.end());
-
-	if (is_place || is_dummy)
+	if (peek == "skip")
+		tokens.expect("skip");
+	else if (is_place)
 		tokens.expect<parse::instance>();
 	else {
+		tokens.expect("skip");
 		tokens.expect<parse_expression::composition>();
 		tokens.increment(true);
 		tokens.expect("->");
@@ -72,18 +73,23 @@ void node::parse(tokenizer &tokens, vector<string> dummies, void *data)
 
 	if (tokens.decrement(__FILE__, __LINE__, data))
 	{
-		if (tokens.found<parse_expression::expression>()) {
+		if (tokens.found("skip")) {
+			tokens.next();
+		} else if (tokens.found<parse_expression::expression>()) {
 			guard = parse_expression::expression(tokens, 0, data);
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
 				tokens.next();
 
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				assign = parse_expression::composition(tokens, 0, data);
+			if (tokens.decrement(__FILE__, __LINE__, data)) {
+				if (tokens.found("skip")) {
+					tokens.next();
+				} else {
+					assign = parse_expression::composition(tokens, 0, data);
+				}
+			}
 		} else if (is_place && tokens.found<parse::instance>()) {
 			place = tokens.next();
-		} else if (is_dummy && tokens.found<parse::instance>()) {
-			// skip
 		}
 
 		tokens.increment(false);
@@ -105,7 +111,7 @@ void node::parse(tokenizer &tokens, vector<string> dummies, void *data)
 
 bool node::is_next(tokenizer &tokens, int i, void *data)
 {
-	return (parse_expression::expression::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
+	return (tokens.is_next("skip") || parse_expression::expression::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
 }
 
 void node::register_syntax(tokenizer &tokens)
@@ -125,10 +131,12 @@ string node::to_string(string tab) const
 	string result = "";
 	if (guard.valid && assign.valid)
 		result += guard.to_string(tab) + "->" + assign.to_string(tab);
+	else if (guard.valid)
+		result += guard.to_string(tab) + "->skip";
 	else if (place != "")
 		result += place;
 	else
-		result += "1->skip";
+		result += "skip";
 
 	if (id != "")
 		result += "/" + id;

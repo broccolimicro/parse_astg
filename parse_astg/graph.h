@@ -28,11 +28,11 @@ struct graph : parse::syntax
 	vector<variable_name> inputs;
 	vector<variable_name> outputs;
 	vector<variable_name> internal;
-	vector<string> dummy;
 	vector<pair<node, parse_expression::expression> > predicate;
 	vector<pair<node, parse_expression::expression> > effective;
 	vector<arc> arcs;
 	vector<pair<parse_expression::expression, vector<node> > > marking;
+	vector<node> arbiter;
 
 	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);

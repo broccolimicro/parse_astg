@@ -49,11 +49,11 @@ void graph::parse(tokenizer &tokens, void *data)
 			tokens.expect("input");
 			tokens.expect("output");
 			tokens.expect("internal");
-			tokens.expect("dummy");
 			tokens.expect("predicate");
 			tokens.expect("effective");
 			tokens.expect("graph");
 			tokens.expect("marking");
+			tokens.expect("arbiter");
 			tokens.expect("end");
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
@@ -113,35 +113,6 @@ void graph::parse(tokenizer &tokens, void *data)
 						tokens.expect<variable_name>();
 					}
 				}
-				else if (tokens.found("dummy"))
-				{
-					tokens.next();
-
-					tokens.increment(false);
-					tokens.expect<parse::instance>();
-
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
-						dummy.push_back(tokens.next());
-
-						tokens.increment(false);
-						tokens.expect("/");
-
-						if (tokens.decrement(__FILE__, __LINE__, data))
-						{
-							tokens.next();
-
-							tokens.increment(true);
-							tokens.expect<parse::number>();
-
-							if (tokens.decrement(__FILE__, __LINE__, data))
-								dummy.back() += "/" + tokens.next();
-						}
-
-						tokens.increment(false);
-						tokens.expect<parse::instance>();
-					}
-				}
 				else if (tokens.found("predicate"))
 				{
 					tokens.next();
@@ -157,7 +128,7 @@ void graph::parse(tokenizer &tokens, void *data)
 
 					while (tokens.decrement(__FILE__, __LINE__, data))
 					{
-						predicate.push_back(pair<node, parse_expression::expression>(node(tokens, dummy, data), parse_expression::expression()));
+						predicate.push_back(pair<node, parse_expression::expression>(node(tokens, data), parse_expression::expression()));
 
 						tokens.increment(false);
 						tokens.expect<parse::instance>();
@@ -190,7 +161,7 @@ void graph::parse(tokenizer &tokens, void *data)
 
 					while (tokens.decrement(__FILE__, __LINE__, data))
 					{
-						effective.push_back(pair<node, parse_expression::expression>(node(tokens, dummy, data), parse_expression::expression()));
+						effective.push_back(pair<node, parse_expression::expression>(node(tokens, data), parse_expression::expression()));
 
 						tokens.increment(false);
 						tokens.expect<parse::instance>();
@@ -223,7 +194,7 @@ void graph::parse(tokenizer &tokens, void *data)
 
 					while (tokens.decrement(__FILE__, __LINE__, data))
 					{
-						arcs.push_back(arc(tokens, dummy, data));
+						arcs.push_back(arc(tokens, data));
 
 						tokens.increment(true);
 						tokens.expect("\n");
@@ -275,7 +246,7 @@ void graph::parse(tokenizer &tokens, void *data)
 
 						while (tokens.decrement(__FILE__, __LINE__, data))
 						{
-							mark.second.push_back(node(tokens, dummy, data));
+							mark.second.push_back(node(tokens, data));
 
 							tokens.increment(false);
 							tokens.expect<node>();
@@ -289,6 +260,33 @@ void graph::parse(tokenizer &tokens, void *data)
 						tokens.increment(false);
 						tokens.expect("{");
 					}
+				}
+				else if (tokens.found("arbiter"))
+				{
+					tokens.next();
+
+					tokens.increment(true);
+					tokens.expect("{");
+
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						tokens.next();
+
+					tokens.increment(true);
+					tokens.expect("}");
+
+					tokens.increment(false);
+					tokens.expect<node>();
+
+					while (tokens.decrement(__FILE__, __LINE__, data))
+					{
+						arbiter.push_back(node(tokens, data));
+
+						tokens.increment(false);
+						tokens.expect<node>();
+					}
+
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						tokens.next();
 				}
 				else if (tokens.found("end"))
 				{
@@ -321,7 +319,6 @@ bool graph::is_next(tokenizer &tokens, int i, void *data)
 			tokens.is_next("input", i+1) ||
 			tokens.is_next("output", i+1) ||
 			tokens.is_next("internal", i+1) ||
-			tokens.is_next("dummy", i+1) ||
 			tokens.is_next("predicate", i+1) ||
 			tokens.is_next("effective", i+1) ||
 			tokens.is_next("graph", i+1) ||
@@ -373,14 +370,6 @@ string graph::to_string(string tab) const
 		result += "\n";
 	}
 
-	if (dummy.size() > 0)
-	{
-		result += ".dummy";
-		for (int i = 0; i < (int)dummy.size(); i++)
-			result += " " + dummy[i];
-		result += "\n";
-	}
-
 	if (predicate.size() > 0)
 	{
 		result += ".predicate\n";
@@ -398,6 +387,19 @@ string graph::to_string(string tab) const
 	result += ".graph\n";
 	for (int i = 0; i < (int)arcs.size(); i++)
 		result += arcs[i].to_string(tab) + "\n";
+
+	if (arbiter.size() > 0)
+	{
+		result += ".arbiter {";
+		for (int i = 0; i < (int)arbiter.size(); i++)
+		{
+			if (i != 0)
+				result += " ";
+
+			result += arbiter[i].to_string(tab);
+		}
+		result += "}\n";
+	}
 
 	if (marking.size() > 0)
 	{

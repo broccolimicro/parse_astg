@@ -18,13 +18,13 @@ namespace parse_astg
 struct arc : parse::syntax
 {
 	arc();
-	arc(tokenizer &tokens, vector<string> dummies, void *data = NULL);
+	arc(tokenizer &tokens, void *data = NULL);
 	arc(node n0, node n1);
 	~arc();
 
 	vector<node> nodes;
 
-	void parse(tokenizer &tokens, vector<string> dummies, void *data = NULL);
+	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 	static void register_syntax(tokenizer &tokens);
 
