@@ -46,7 +46,7 @@ void arc::parse(tokenizer &tokens, void *data)
 	{
 		nodes.push_back(node(tokens, data));
 
-		tokens.increment(i == 0);
+		tokens.increment(false);
 		tokens.expect<node>();
 	}
 
