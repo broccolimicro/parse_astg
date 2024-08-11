@@ -31,7 +31,7 @@ struct graph : parse::syntax
 	vector<pair<node, parse_expression::expression> > predicate;
 	vector<pair<node, parse_expression::expression> > effective;
 	vector<arc> arcs;
-	vector<pair<parse_expression::expression, vector<node> > > marking;
+	vector<pair<parse_expression::composition, vector<node> > > marking;
 	vector<node> arbiter;
 
 	void parse(tokenizer &tokens, void *data = NULL);

@@ -223,7 +223,7 @@ void graph::parse(tokenizer &tokens, void *data)
 						tokens.increment(false);
 						tokens.expect("[");
 
-						pair<parse_expression::expression, vector<node> > mark;
+						pair<parse_expression::composition, vector<node> > mark;
 						if (tokens.decrement(__FILE__, __LINE__, data))
 						{
 							tokens.next();
@@ -232,10 +232,10 @@ void graph::parse(tokenizer &tokens, void *data)
 							tokens.expect("]");
 
 							tokens.increment(true);
-							tokens.expect<parse_expression::expression>();
+							tokens.expect<parse_expression::composition>();
 
 							if (tokens.decrement(__FILE__, __LINE__, data))
-								mark.first = parse_expression::expression(tokens, 0, data);
+								mark.first = parse_expression::composition(tokens, 0, data);
 
 							if (tokens.decrement(__FILE__, __LINE__, data))
 								tokens.next();
