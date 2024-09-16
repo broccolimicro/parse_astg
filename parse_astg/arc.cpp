@@ -42,8 +42,7 @@ void arc::parse(tokenizer &tokens, void *data)
 	tokens.increment(true);
 	tokens.expect<node>();
 
-	for (int i = 0; tokens.decrement(__FILE__, __LINE__, data); i++)
-	{
+	while (tokens.decrement(__FILE__, __LINE__, data)) {
 		nodes.push_back(node(tokens, data));
 
 		tokens.increment(false);
