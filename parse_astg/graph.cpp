@@ -1,11 +1,3 @@
-/*
- * graph.cpp
- *
- *  Created on: Feb 3, 2014
- *      Author: nbingham
- */
-
-#include <parse_ucs/variable_name.h>
 #include "../parse_astg/graph.h"
 #include <parse/default/instance.h>
 #include <parse/default/symbol.h>
@@ -73,14 +65,14 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<variable_name>();
+					tokens.expect<parse_expression::expression>();
 
 					while (tokens.decrement(__FILE__, __LINE__, data))
 					{
-						inputs.push_back(variable_name(tokens, data));
+						inputs.push_back(parse_expression::expression(tokens, parse_expression::assignment::lvalueLevel, data));
 
 						tokens.increment(false);
-						tokens.expect<variable_name>();
+						tokens.expect<parse_expression::expression>();
 					}
 				}
 				else if (tokens.found("output"))
@@ -88,14 +80,14 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<variable_name>();
+					tokens.expect<parse_expression::expression>();
 
 					while (tokens.decrement(__FILE__, __LINE__, data))
 					{
-						internal.push_back(variable_name(tokens, data));
+						internal.push_back(parse_expression::expression(tokens, parse_expression::assignment::lvalueLevel, data));
 
 						tokens.increment(false);
-						tokens.expect<variable_name>();
+						tokens.expect<parse_expression::expression>();
 					}
 				}
 				else if (tokens.found("internal"))
@@ -103,14 +95,14 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<variable_name>();
+					tokens.expect<parse_expression::expression>();
 
 					while (tokens.decrement(__FILE__, __LINE__, data))
 					{
-						internal.push_back(variable_name(tokens, data));
+						internal.push_back(parse_expression::expression(tokens, parse_expression::assignment::lvalueLevel, data));
 
 						tokens.increment(false);
-						tokens.expect<variable_name>();
+						tokens.expect<parse_expression::expression>();
 					}
 				}
 				else if (tokens.found("predicate"))

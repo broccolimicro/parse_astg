@@ -1,21 +1,13 @@
-/*
- * factory.h
- *
- *  Created on: Aug 16, 2015
- *      Author: nbingham
- */
+#pragma once
 
-#include "../parse_astg/graph.h"
+#include <parse/parse.h>
+#include <parse/syntax.h>
 
-#ifndef factory_h
-#define factory_h
+namespace parse_astg {
 
-namespace parse_astg
-{
-	parse::syntax *factory(tokenizer &tokens, void *data)
-	{
-		return new graph(tokens, data);
-	};
+parse::syntax *produce(tokenizer &tokens, void *data=nullptr);
+void expect(tokenizer &tokens);
+void setup_expressions();
+void register_syntax(tokenizer &tokens);
+
 }
-
-#endif

@@ -1,22 +1,11 @@
-/*
- * graph.h
- *
- *  Created on: Feb 3, 2014
- *      Author: nbingham
- */
+#pragma once
 
 #include <parse/syntax.h>
-#include <parse_ucs/variable_name.h>
 #include "../parse_astg/arc.h"
 #include "../parse_astg/node.h"
 
-#ifndef parse_astg_graph_h
-#define parse_astg_graph_h
-
 namespace parse_astg
 {
-
-using parse_ucs::variable_name;
 
 struct graph : parse::syntax
 {
@@ -25,9 +14,9 @@ struct graph : parse::syntax
 	~graph();
 
 	string name;
-	vector<variable_name> inputs;
-	vector<variable_name> outputs;
-	vector<variable_name> internal;
+	vector<parse_expression::expression> inputs;
+	vector<parse_expression::expression> outputs;
+	vector<parse_expression::expression> internal;
 	vector<pair<node, parse_expression::expression> > predicate;
 	vector<pair<node, parse_expression::expression> > effective;
 	vector<arc> arcs;
@@ -44,4 +33,3 @@ struct graph : parse::syntax
 
 }
 
-#endif
