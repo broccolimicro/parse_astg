@@ -1,17 +1,8 @@
-/*
- * node.h
- *
- *  Created on: Feb 3, 2014
- *      Author: nbingham
- */
+#pragma once
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <parse_expression/composition.h>
-#include <parse_expression/expression.h>
-
-#ifndef parse_astg_node_h
-#define parse_astg_node_h
+#include <parse_astg/expression.h>
 
 namespace parse_astg
 {
@@ -20,12 +11,12 @@ struct node : parse::syntax
 {
 	node();
 	node(tokenizer &tokens, void *data = NULL);
-	node(parse_expression::expression guard, parse_expression::composition assign, string id = "");
+	node(expression guard, composition assign, string id = "");
 	node(string place, string id = "");
 	~node();
 
-	parse_expression::composition assign;
-	parse_expression::expression guard;
+	composition assign;
+	expression guard;
 	string place;
 	string id;
 
@@ -38,5 +29,3 @@ struct node : parse::syntax
 };
 
 }
-
-#endif

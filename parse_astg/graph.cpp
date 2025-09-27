@@ -1,30 +1,25 @@
-#include "../parse_astg/graph.h"
+#include <parse_astg/graph.h>
 #include <parse/default/instance.h>
 #include <parse/default/symbol.h>
 #include <parse/default/number.h>
 #include <parse/default/white_space.h>
 #include <parse/default/new_line.h>
 
-namespace parse_astg
-{
+namespace parse_astg {
 
-graph::graph()
-{
-	debug_name = "graph";
+graph::graph() {
+	debug_name = "astg_graph";
 }
 
-graph::graph(tokenizer &tokens, void *data)
-{
-	debug_name = "graph";
+graph::graph(tokenizer &tokens, void *data) {
+	debug_name = "astg_graph";
 	parse(tokens, data);
 }
 
-graph::~graph()
-{
+graph::~graph() {
 }
 
-void graph::parse(tokenizer &tokens, void *data)
-{
+void graph::parse(tokenizer &tokens, void *data) {
 	tokens.syntax_start(this);
 
 	tokens.increment(true);
@@ -32,10 +27,8 @@ void graph::parse(tokenizer &tokens, void *data)
 	tokens.expect("\n");
 
 	bool done = false;
-	while (!done && tokens.decrement(__FILE__, __LINE__, data))
-	{
-		if (tokens.next() == ".")
-		{
+	while (!done && tokens.decrement(__FILE__, __LINE__, data)) {
+		if (tokens.next() == ".") {
 			tokens.increment(false);
 			tokens.expect("model");
 			tokens.expect("input");
@@ -48,65 +41,53 @@ void graph::parse(tokenizer &tokens, void *data)
 			tokens.expect("arbiter");
 			tokens.expect("end");
 
-			if (tokens.decrement(__FILE__, __LINE__, data))
-			{
-				if (tokens.found("model"))
-				{
+			if (tokens.decrement(__FILE__, __LINE__, data)) {
+				if (tokens.found("model")) {
 					tokens.next();
 
 					tokens.increment(true);
 					tokens.expect<parse::instance>();
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data)) {
 						name = tokens.next();
-				}
-				if (tokens.found("input"))
-				{
+					}
+				} else if (tokens.found("input")) {
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<parse_expression::expression>();
+					tokens.expect<expression>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
-						inputs.push_back(parse_expression::expression(tokens, parse_expression::assignment::lvalueLevel, data));
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
+						inputs.push_back(expression(tokens, assignment::lvalueLevel, data));
 
 						tokens.increment(false);
-						tokens.expect<parse_expression::expression>();
+						tokens.expect<expression>();
 					}
-				}
-				else if (tokens.found("output"))
-				{
+				} else if (tokens.found("output")) {
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<parse_expression::expression>();
+					tokens.expect<expression>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
-						internal.push_back(parse_expression::expression(tokens, parse_expression::assignment::lvalueLevel, data));
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
+						internal.push_back(expression(tokens, assignment::lvalueLevel, data));
 
 						tokens.increment(false);
-						tokens.expect<parse_expression::expression>();
+						tokens.expect<expression>();
 					}
-				}
-				else if (tokens.found("internal"))
-				{
+				} else if (tokens.found("internal")) {
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<parse_expression::expression>();
+					tokens.expect<expression>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
-						internal.push_back(parse_expression::expression(tokens, parse_expression::assignment::lvalueLevel, data));
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
+						internal.push_back(expression(tokens, assignment::lvalueLevel, data));
 
 						tokens.increment(false);
-						tokens.expect<parse_expression::expression>();
+						tokens.expect<expression>();
 					}
-				}
-				else if (tokens.found("predicate"))
-				{
+				} else if (tokens.found("predicate")) {
 					tokens.next();
 
 					tokens.increment(false);
@@ -115,12 +96,12 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.increment(true);
 					tokens.expect("\n");
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data)) {
 						tokens.next();
+					}
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
-						predicate.push_back(pair<node, parse_expression::expression>(node(tokens, data), parse_expression::expression()));
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
+						predicate.push_back(pair<node, expression>(node(tokens, data), expression()));
 
 						tokens.increment(false);
 						tokens.expect<parse::instance>();
@@ -129,17 +110,17 @@ void graph::parse(tokenizer &tokens, void *data)
 						tokens.expect("\n");
 
 						tokens.increment(true);
-						tokens.expect<parse_expression::expression>();
+						tokens.expect<expression>();
 
-						if (tokens.decrement(__FILE__, __LINE__, data))
-							predicate.back().second = parse_expression::expression(tokens, 0, data);
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
+							predicate.back().second = expression(tokens, 0, data);
+						}
 
-						if (tokens.decrement(__FILE__, __LINE__, data))
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
 							tokens.next();
+						}
 					}
-				}
-				else if (tokens.found("effective"))
-				{
+				} else if (tokens.found("effective")) {
 					tokens.next();
 
 					tokens.increment(false);
@@ -148,12 +129,12 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.increment(true);
 					tokens.expect("\n");
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data)) {
 						tokens.next();
+					}
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
-						effective.push_back(pair<node, parse_expression::expression>(node(tokens, data), parse_expression::expression()));
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
+						effective.push_back(pair<node, expression>(node(tokens, data), expression()));
 
 						tokens.increment(false);
 						tokens.expect<parse::instance>();
@@ -162,17 +143,17 @@ void graph::parse(tokenizer &tokens, void *data)
 						tokens.expect("\n");
 
 						tokens.increment(true);
-						tokens.expect<parse_expression::expression>();
+						tokens.expect<expression>();
 
-						if (tokens.decrement(__FILE__, __LINE__, data))
-							effective.back().second = parse_expression::expression(tokens, 0, data);
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
+							effective.back().second = expression(tokens, 0, data);
+						}
 
-						if (tokens.decrement(__FILE__, __LINE__, data))
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
 							tokens.next();
+						}
 					}
-				}
-				else if (tokens.found("graph"))
-				{
+				} else if (tokens.found("graph")) {
 					tokens.next();
 
 					tokens.increment(false);
@@ -181,32 +162,30 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.increment(true);
 					tokens.expect("\n");
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data)) {
 						tokens.next();
+					}
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
 						arcs.push_back(arc(tokens, data));
 
 						tokens.increment(true);
 						tokens.expect("\n");
 
-						if (tokens.decrement(__FILE__, __LINE__, data))
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
 							tokens.next();
+						}
 
 						tokens.increment(false);
 						tokens.expect<arc>();
 					}
-				}
-				else if (tokens.found("marking"))
-				{
+				} else if (tokens.found("marking")) {
 					tokens.next();
 
 					tokens.increment(true);
 					tokens.expect("{");
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
 						tokens.next();
 
 						tokens.increment(true);
@@ -215,53 +194,53 @@ void graph::parse(tokenizer &tokens, void *data)
 						tokens.increment(false);
 						tokens.expect("[");
 
-						pair<parse_expression::composition, vector<node> > mark;
-						if (tokens.decrement(__FILE__, __LINE__, data))
-						{
+						pair<composition, vector<node> > mark;
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
 							tokens.next();
 
 							tokens.increment(true);
 							tokens.expect("]");
 
 							tokens.increment(true);
-							tokens.expect<parse_expression::composition>();
+							tokens.expect<composition>();
 
-							if (tokens.decrement(__FILE__, __LINE__, data))
-								mark.first = parse_expression::composition(tokens, 0, data);
+							if (tokens.decrement(__FILE__, __LINE__, data)) {
+								mark.first = composition(tokens, 0, data);
+							}
 
-							if (tokens.decrement(__FILE__, __LINE__, data))
+							if (tokens.decrement(__FILE__, __LINE__, data)) {
 								tokens.next();
+							}
 						}
 
 						tokens.increment(false);
 						tokens.expect<node>();
 
-						while (tokens.decrement(__FILE__, __LINE__, data))
-						{
+						while (tokens.decrement(__FILE__, __LINE__, data)) {
 							mark.second.push_back(node(tokens, data));
 
 							tokens.increment(false);
 							tokens.expect<node>();
 						}
 
-						if (tokens.decrement(__FILE__, __LINE__, data))
+						if (tokens.decrement(__FILE__, __LINE__, data)) {
 							tokens.next();
+						}
 
 						marking.push_back(mark);
 
 						tokens.increment(false);
 						tokens.expect("{");
 					}
-				}
-				else if (tokens.found("arbiter"))
-				{
+				} else if (tokens.found("arbiter")) {
 					tokens.next();
 
 					tokens.increment(true);
 					tokens.expect("{");
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data)) {
 						tokens.next();
+					}
 
 					tokens.increment(true);
 					tokens.expect("}");
@@ -269,29 +248,26 @@ void graph::parse(tokenizer &tokens, void *data)
 					tokens.increment(false);
 					tokens.expect<node>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data))
-					{
+					while (tokens.decrement(__FILE__, __LINE__, data)) {
 						arbiter.push_back(node(tokens, data));
 
 						tokens.increment(false);
 						tokens.expect<node>();
 					}
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__, data)) {
 						tokens.next();
-				}
-				else if (tokens.found("end"))
-				{
+					}
+				} else if (tokens.found("end")) {
 					tokens.next();
 					done = true;
 				}
-			}
-			else while (tokens.peek(1) != "." && tokens.peek(1) != "")
+			} else while (tokens.peek(1) != "." && tokens.peek(1) != "") {
 				tokens.next();
+			}
 		}
 
-		if (!done)
-		{
+		if (!done) {
 			tokens.increment(true);
 			tokens.expect(".");
 			tokens.expect("\n");
@@ -301,10 +277,10 @@ void graph::parse(tokenizer &tokens, void *data)
 	tokens.syntax_end(this);
 }
 
-bool graph::is_next(tokenizer &tokens, int i, void *data)
-{
-	while (tokens.is_next("\n", i))
+bool graph::is_next(tokenizer &tokens, int i, void *data) {
+	while (tokens.is_next("\n", i)) {
 		i++;
+	}
 
 	return tokens.is_next(".", i) &&
 			(tokens.is_next("model", i+1) ||
@@ -317,10 +293,8 @@ bool graph::is_next(tokenizer &tokens, int i, void *data)
 			tokens.is_next("end", i+1));
 }
 
-void graph::register_syntax(tokenizer &tokens)
-{
-	if (!tokens.syntax_registered<graph>())
-	{
+void graph::register_syntax(tokenizer &tokens) {
+	if (!tokens.syntax_registered<graph>()) {
 		tokens.register_syntax<graph>();
 		arc::register_syntax(tokens);
 		node::register_syntax(tokens);
@@ -332,80 +306,79 @@ void graph::register_syntax(tokenizer &tokens)
 	}
 }
 
-string graph::to_string(string tab) const
-{
+string graph::to_string(string tab) const {
 	string result = "";
-	if (name != "")
+	if (name != "") {
 		result += ".model " + name + "\n";
+	}
 
-	if (inputs.size() > 0)
-	{
+	if (inputs.size() > 0) {
 		result += ".input";
-		for (int i = 0; i < (int)inputs.size(); i++)
+		for (int i = 0; i < (int)inputs.size(); i++) {
 			result += " " + inputs[i].to_string(tab);
+		}
 		result += "\n";
 	}
 
-	if (outputs.size() > 0)
-	{
+	if (outputs.size() > 0) {
 		result += ".output";
-		for (int i = 0; i < (int)outputs.size(); i++)
+		for (int i = 0; i < (int)outputs.size(); i++) {
 			result += " " + outputs[i].to_string(tab);
+		}
 		result += "\n";
 	}
 
-	if (internal.size() > 0)
-	{
+	if (internal.size() > 0) {
 		result += ".internal";
-		for (int i = 0; i < (int)internal.size(); i++)
+		for (int i = 0; i < (int)internal.size(); i++) {
 			result += " " + internal[i].to_string(tab);
+		}
 		result += "\n";
 	}
 
-	if (predicate.size() > 0)
-	{
+	if (predicate.size() > 0) {
 		result += ".predicate\n";
-		for (int i = 0; i < (int)predicate.size(); i++)
+		for (int i = 0; i < (int)predicate.size(); i++) {
 			result += predicate[i].first.to_string() + " " + predicate[i].second.to_string() + "\n";
+		}
 	}
 
-	if (effective.size() > 0)
-	{
+	if (effective.size() > 0) {
 		result += ".effective\n";
-		for (int i = 0; i < (int)effective.size(); i++)
+		for (int i = 0; i < (int)effective.size(); i++) {
 			result += effective[i].first.to_string() + " " + effective[i].second.to_string() + "\n";
+		}
 	}
 
 	result += ".graph\n";
-	for (int i = 0; i < (int)arcs.size(); i++)
+	for (int i = 0; i < (int)arcs.size(); i++) {
 		result += arcs[i].to_string(tab) + "\n";
+	}
 
-	if (arbiter.size() > 0)
-	{
+	if (arbiter.size() > 0) {
 		result += ".arbiter {";
-		for (int i = 0; i < (int)arbiter.size(); i++)
-		{
-			if (i != 0)
+		for (int i = 0; i < (int)arbiter.size(); i++) {
+			if (i != 0) {
 				result += " ";
+			}
 
 			result += arbiter[i].to_string(tab);
 		}
 		result += "}\n";
 	}
 
-	if (marking.size() > 0)
-	{
+	if (marking.size() > 0) {
 		result += ".marking";
-		for (int i = 0; i < (int)marking.size(); i++)
-		{
+		for (int i = 0; i < (int)marking.size(); i++) {
 			result += " {";
-			if (marking[i].first.valid)
+			if (marking[i].first.valid) {
 				result += "[" + marking[i].first.to_string(tab) + "] ";
+			}
 
-			for (int j = 0; j < (int)marking[i].second.size(); j++)
-			{
-				if (j != 0)
+			for (int j = 0; j < (int)marking[i].second.size(); j++) {
+				if (j != 0) {
 					result += " ";
+				}
 
 				result += marking[i].second[j].to_string(tab);
 			}
@@ -418,8 +391,7 @@ string graph::to_string(string tab) const
 	return result;
 }
 
-parse::syntax *graph::clone() const
-{
+parse::syntax *graph::clone() const {
 	return new graph(*this);
 }
 

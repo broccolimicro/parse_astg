@@ -1,42 +1,29 @@
-/*
- * arc.cpp
- *
- *  Created on: Feb 3, 2014
- *      Author: nbingham
- */
-
-#include "../parse_astg/arc.h"
+#include <parse_astg/arc.h>
 
 #include <parse/default/instance.h>
 #include <parse/default/symbol.h>
 
-namespace parse_astg
-{
+namespace parse_astg {
 
-arc::arc()
-{
-	debug_name = "arc";
+arc::arc() {
+	debug_name = "astg_arc";
 }
 
-arc::arc(tokenizer &tokens, void *data)
-{
-	debug_name = "arc";
+arc::arc(tokenizer &tokens, void *data) {
+	debug_name = "astg_arc";
 	parse(tokens, data);
 }
 
-arc::arc(node n0, node n1)
-{
-	debug_name = "src";
+arc::arc(node n0, node n1) {
+	debug_name = "astg_src";
 	nodes.push_back(n0);
 	nodes.push_back(n1);
 }
 
-arc::~arc()
-{
+arc::~arc() {
 }
 
-void arc::parse(tokenizer &tokens, void *data)
-{
+void arc::parse(tokenizer &tokens, void *data) {
 	tokens.syntax_start(this);
 
 	tokens.increment(true);
@@ -52,22 +39,18 @@ void arc::parse(tokenizer &tokens, void *data)
 	tokens.syntax_end(this);
 }
 
-bool arc::is_next(tokenizer &tokens, int i, void *data)
-{
+bool arc::is_next(tokenizer &tokens, int i, void *data) {
 	return node::is_next(tokens, i, data);
 }
 
-void arc::register_syntax(tokenizer &tokens)
-{
-	if (!tokens.syntax_registered<arc>())
-	{
+void arc::register_syntax(tokenizer &tokens) {
+	if (!tokens.syntax_registered<arc>()) {
 		tokens.register_syntax<arc>();
 		node::register_syntax(tokens);
 	}
 }
 
-string arc::to_string(string tab) const
-{
+string arc::to_string(string tab) const {
 	string result = "";
 	for (int i = 0; i < (int)nodes.size(); i++)
 	{
@@ -80,8 +63,7 @@ string arc::to_string(string tab) const
 	return result;
 }
 
-parse::syntax *arc::clone() const
-{
+parse::syntax *arc::clone() const {
 	return new arc(*this);
 }
 

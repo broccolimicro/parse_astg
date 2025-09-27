@@ -1,54 +1,40 @@
-/*
- * node.cpp
- *
- *  Created on: Feb 3, 2014
- *      Author: nbingham
- */
-
-#include "../parse_astg/node.h"
+#include <parse_astg/node.h>
 
 #include <parse/default/instance.h>
 #include <parse/default/symbol.h>
 #include <parse/default/number.h>
 
-namespace parse_astg
-{
+namespace parse_astg {
 
-node::node()
-{
-	debug_name = "node";
+node::node() {
+	debug_name = "astg_node";
 	place = "";
 }
 
-node::node(tokenizer &tokens, void *data)
-{
-	debug_name = "node";
+node::node(tokenizer &tokens, void *data) {
+	debug_name = "astg_node";
 	place = "";
 	parse(tokens, data);
 }
 
-node::node(parse_expression::expression guard, parse_expression::composition assign, string id)
-{
-	debug_name = "node";
+node::node(expression guard, composition assign, string id) {
+	debug_name = "astg_node";
 	place = "";
 	this->guard = guard;
 	this->assign = assign;
 	this->id = id;
 }
 
-node::node(string place, string id)
-{
-	debug_name = "node";
+node::node(string place, string id) {
+	debug_name = "astg_node";
 	this->place = place;
 	this->id = id;
 }
 
-node::~node()
-{
+node::~node() {
 }
 
-void node::parse(tokenizer &tokens, void *data)
-{
+void node::parse(tokenizer &tokens, void *data) {
 	tokens.syntax_start(this);
 
 	tokens.increment(true);
@@ -64,19 +50,19 @@ void node::parse(tokenizer &tokens, void *data)
 		tokens.expect<parse::instance>();
 	else {
 		tokens.expect("skip");
-		tokens.expect<parse_expression::composition>();
+		tokens.expect<composition>();
 		tokens.increment(true);
 		tokens.expect("->");
 		tokens.increment(true);
-		tokens.expect<parse_expression::expression>();
+		tokens.expect<expression>();
 	}
 
 	if (tokens.decrement(__FILE__, __LINE__, data))
 	{
 		if (tokens.found("skip")) {
 			tokens.next();
-		} else if (tokens.found<parse_expression::expression>()) {
-			guard = parse_expression::expression(tokens, 0, data);
+		} else if (tokens.found<expression>()) {
+			guard = expression(tokens, 0, data);
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
 				tokens.next();
@@ -85,7 +71,7 @@ void node::parse(tokenizer &tokens, void *data)
 				if (tokens.found("skip")) {
 					tokens.next();
 				} else {
-					assign = parse_expression::composition(tokens, 0, data);
+					assign = composition(tokens, 0, data);
 				}
 			}
 		} else if (is_place && tokens.found<parse::instance>()) {
@@ -109,43 +95,41 @@ void node::parse(tokenizer &tokens, void *data)
 	tokens.syntax_end(this);
 }
 
-bool node::is_next(tokenizer &tokens, int i, void *data)
-{
-	return (tokens.is_next("skip") || parse_expression::expression::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
+bool node::is_next(tokenizer &tokens, int i, void *data) {
+	return (tokens.is_next("skip") || expression::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
 }
 
-void node::register_syntax(tokenizer &tokens)
-{
-	if (!tokens.syntax_registered<node>())
-	{
+void node::register_syntax(tokenizer &tokens) {
+	if (!tokens.syntax_registered<node>()) {
+		setup_expressions();
 		tokens.register_syntax<node>();
-		parse_expression::composition::register_syntax(tokens);
-		parse_expression::expression::register_syntax(tokens);
+		composition::register_syntax(tokens);
+		expression::register_syntax(tokens);
 		tokens.register_token<parse::instance>();
 		tokens.register_token<parse::symbol>();
 	}
 }
 
-string node::to_string(string tab) const
-{
+string node::to_string(string tab) const {
 	string result = "";
-	if (guard.valid && assign.valid)
+	if (guard.valid && assign.valid) {
 		result += guard.to_string(tab) + "->" + assign.to_string(tab);
-	else if (guard.valid)
+	} else if (guard.valid) {
 		result += guard.to_string(tab) + "->skip";
-	else if (place != "")
+	} else if (place != "") {
 		result += place;
-	else
+	} else {
 		result += "skip";
+	}
 
-	if (id != "")
+	if (id != "") {
 		result += "/" + id;
+	}
 
 	return result;
 }
 
-parse::syntax *node::clone() const
-{
+parse::syntax *node::clone() const {
 	return new node(*this);
 }
 

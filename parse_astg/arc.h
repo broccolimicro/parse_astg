@@ -1,22 +1,12 @@
-/*
- * arc.h
- *
- *  Created on: Feb 3, 2014
- *      Author: nbingham
- */
+#pragma once
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include "../parse_astg/node.h"
+#include <parse_astg/node.h>
 
-#ifndef parse_astg_arc_h
-#define parse_astg_arc_h
+namespace parse_astg {
 
-namespace parse_astg
-{
-
-struct arc : parse::syntax
-{
+struct arc : parse::syntax {
 	arc();
 	arc(tokenizer &tokens, void *data = NULL);
 	arc(node n0, node n1);
@@ -33,5 +23,3 @@ struct arc : parse::syntax
 };
 
 }
-
-#endif
