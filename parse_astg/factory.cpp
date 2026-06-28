@@ -1,7 +1,6 @@
 #include "factory.h"
 
 #include "graph.h"
-#include <parse_expression/precedence.h>
 
 namespace parse_astg {
 
@@ -16,6 +15,12 @@ void expect(tokenizer &tokens) {
 void register_syntax(tokenizer &tokens) {
 	graph::register_syntax(tokens);
 }
+
+const parse::factory factory{
+	register_syntax,
+	expect,
+	produce
+};
 
 }
 
