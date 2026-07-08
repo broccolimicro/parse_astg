@@ -16,11 +16,7 @@ void register_syntax(tokenizer &tokens) {
 	graph::register_syntax(tokens);
 }
 
-const parse::factory factory{
-	register_syntax,
-	expect,
-	produce
-};
+const parse::factory factory(register_syntax, expect, produce);
 
 }
 
