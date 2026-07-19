@@ -9,7 +9,7 @@ arc::arc() {
 	debug_name = "astg_arc";
 }
 
-arc::arc(tokenizer &tokens, void *data) {
+arc::arc(tokenizer &tokens, std::any data) {
 	debug_name = "astg_arc";
 	parse(tokens, data);
 }
@@ -23,13 +23,13 @@ arc::arc(node n0, node n1) {
 arc::~arc() {
 }
 
-void arc::parse(tokenizer &tokens, void *data) {
+void arc::parse(tokenizer &tokens, std::any data) {
 	tokens.syntax_start(this);
 
 	tokens.increment(true);
 	tokens.expect<node>();
 
-	while (tokens.decrement(__FILE__, __LINE__, data)) {
+	while (tokens.decrement(__FILE__, __LINE__)) {
 		nodes.push_back(node(tokens, data));
 
 		tokens.increment(false);
@@ -39,7 +39,7 @@ void arc::parse(tokenizer &tokens, void *data) {
 	tokens.syntax_end(this);
 }
 
-bool arc::is_next(tokenizer &tokens, int i, void *data) {
+bool arc::is_next(tokenizer &tokens, int i, std::any data) {
 	return node::is_next(tokens, i, data);
 }
 

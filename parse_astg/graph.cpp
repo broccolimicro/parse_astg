@@ -11,7 +11,7 @@ graph::graph() {
 	debug_name = "astg_graph";
 }
 
-graph::graph(tokenizer &tokens, void *data) {
+graph::graph(tokenizer &tokens, std::any data) {
 	debug_name = "astg_graph";
 	parse(tokens, data);
 }
@@ -19,7 +19,7 @@ graph::graph(tokenizer &tokens, void *data) {
 graph::~graph() {
 }
 
-void graph::parse(tokenizer &tokens, void *data) {
+void graph::parse(tokenizer &tokens, std::any data) {
 	tokens.syntax_start(this);
 
 	tokens.increment(true);
@@ -27,7 +27,7 @@ void graph::parse(tokenizer &tokens, void *data) {
 	tokens.expect("\n");
 
 	bool done = false;
-	while (!done && tokens.decrement(__FILE__, __LINE__, data)) {
+	while (!done && tokens.decrement(__FILE__, __LINE__)) {
 		if (tokens.next() == ".") {
 			tokens.increment(false);
 			tokens.expect("model");
@@ -41,51 +41,51 @@ void graph::parse(tokenizer &tokens, void *data) {
 			tokens.expect("arbiter");
 			tokens.expect("end");
 
-			if (tokens.decrement(__FILE__, __LINE__, data)) {
+			if (tokens.decrement(__FILE__, __LINE__)) {
 				if (tokens.found("model")) {
 					tokens.next();
 
 					tokens.increment(true);
 					tokens.expect<parse::instance>();
 
-					if (tokens.decrement(__FILE__, __LINE__, data)) {
+					if (tokens.decrement(__FILE__, __LINE__)) {
 						name = tokens.next();
 					}
 				} else if (tokens.found("input")) {
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<expression>();
+					tokens.expect<lvalue>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
-						inputs.push_back(expression(tokens, assignment::lvalueLevel, data));
+					while (tokens.decrement(__FILE__, __LINE__)) {
+						inputs.push_back(lvalue(tokens, data));
 
 						tokens.increment(false);
-						tokens.expect<expression>();
+						tokens.expect<lvalue>();
 					}
 				} else if (tokens.found("output")) {
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<expression>();
+					tokens.expect<lvalue>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
-						internal.push_back(expression(tokens, assignment::lvalueLevel, data));
+					while (tokens.decrement(__FILE__, __LINE__)) {
+						outputs.push_back(lvalue(tokens, data));
 
 						tokens.increment(false);
-						tokens.expect<expression>();
+						tokens.expect<lvalue>();
 					}
 				} else if (tokens.found("internal")) {
 					tokens.next();
 
 					tokens.increment(false);
-					tokens.expect<expression>();
+					tokens.expect<lvalue>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
-						internal.push_back(expression(tokens, assignment::lvalueLevel, data));
+					while (tokens.decrement(__FILE__, __LINE__)) {
+						internal.push_back(lvalue(tokens, data));
 
 						tokens.increment(false);
-						tokens.expect<expression>();
+						tokens.expect<lvalue>();
 					}
 				} else if (tokens.found("predicate")) {
 					tokens.next();
@@ -96,11 +96,11 @@ void graph::parse(tokenizer &tokens, void *data) {
 					tokens.increment(true);
 					tokens.expect("\n");
 
-					if (tokens.decrement(__FILE__, __LINE__, data)) {
+					if (tokens.decrement(__FILE__, __LINE__)) {
 						tokens.next();
 					}
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
+					while (tokens.decrement(__FILE__, __LINE__)) {
 						predicate.push_back(pair<node, expression>(node(tokens, data), expression()));
 
 						tokens.increment(false);
@@ -112,11 +112,11 @@ void graph::parse(tokenizer &tokens, void *data) {
 						tokens.increment(true);
 						tokens.expect<expression>();
 
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
-							predicate.back().second = expression(tokens, 0, data);
+						if (tokens.decrement(__FILE__, __LINE__)) {
+							predicate.back().second = expression(tokens, data);
 						}
 
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
+						if (tokens.decrement(__FILE__, __LINE__)) {
 							tokens.next();
 						}
 					}
@@ -129,11 +129,11 @@ void graph::parse(tokenizer &tokens, void *data) {
 					tokens.increment(true);
 					tokens.expect("\n");
 
-					if (tokens.decrement(__FILE__, __LINE__, data)) {
+					if (tokens.decrement(__FILE__, __LINE__)) {
 						tokens.next();
 					}
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
+					while (tokens.decrement(__FILE__, __LINE__)) {
 						effective.push_back(pair<node, expression>(node(tokens, data), expression()));
 
 						tokens.increment(false);
@@ -145,11 +145,11 @@ void graph::parse(tokenizer &tokens, void *data) {
 						tokens.increment(true);
 						tokens.expect<expression>();
 
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
-							effective.back().second = expression(tokens, 0, data);
+						if (tokens.decrement(__FILE__, __LINE__)) {
+							effective.back().second = expression(tokens, data);
 						}
 
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
+						if (tokens.decrement(__FILE__, __LINE__)) {
 							tokens.next();
 						}
 					}
@@ -162,17 +162,17 @@ void graph::parse(tokenizer &tokens, void *data) {
 					tokens.increment(true);
 					tokens.expect("\n");
 
-					if (tokens.decrement(__FILE__, __LINE__, data)) {
+					if (tokens.decrement(__FILE__, __LINE__)) {
 						tokens.next();
 					}
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
+					while (tokens.decrement(__FILE__, __LINE__)) {
 						arcs.push_back(arc(tokens, data));
 
 						tokens.increment(true);
 						tokens.expect("\n");
 
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
+						if (tokens.decrement(__FILE__, __LINE__)) {
 							tokens.next();
 						}
 
@@ -185,7 +185,7 @@ void graph::parse(tokenizer &tokens, void *data) {
 					tokens.increment(true);
 					tokens.expect("{");
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
+					while (tokens.decrement(__FILE__, __LINE__)) {
 						tokens.next();
 
 						tokens.increment(true);
@@ -195,7 +195,7 @@ void graph::parse(tokenizer &tokens, void *data) {
 						tokens.expect("[");
 
 						pair<composition, vector<node> > mark;
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
+						if (tokens.decrement(__FILE__, __LINE__)) {
 							tokens.next();
 
 							tokens.increment(true);
@@ -204,11 +204,11 @@ void graph::parse(tokenizer &tokens, void *data) {
 							tokens.increment(true);
 							tokens.expect<composition>();
 
-							if (tokens.decrement(__FILE__, __LINE__, data)) {
-								mark.first = composition(tokens, 0, data);
+							if (tokens.decrement(__FILE__, __LINE__)) {
+								mark.first = composition(tokens, data);
 							}
 
-							if (tokens.decrement(__FILE__, __LINE__, data)) {
+							if (tokens.decrement(__FILE__, __LINE__)) {
 								tokens.next();
 							}
 						}
@@ -216,14 +216,14 @@ void graph::parse(tokenizer &tokens, void *data) {
 						tokens.increment(false);
 						tokens.expect<node>();
 
-						while (tokens.decrement(__FILE__, __LINE__, data)) {
+						while (tokens.decrement(__FILE__, __LINE__)) {
 							mark.second.push_back(node(tokens, data));
 
 							tokens.increment(false);
 							tokens.expect<node>();
 						}
 
-						if (tokens.decrement(__FILE__, __LINE__, data)) {
+						if (tokens.decrement(__FILE__, __LINE__)) {
 							tokens.next();
 						}
 
@@ -238,7 +238,7 @@ void graph::parse(tokenizer &tokens, void *data) {
 					tokens.increment(true);
 					tokens.expect("{");
 
-					if (tokens.decrement(__FILE__, __LINE__, data)) {
+					if (tokens.decrement(__FILE__, __LINE__)) {
 						tokens.next();
 					}
 
@@ -248,14 +248,14 @@ void graph::parse(tokenizer &tokens, void *data) {
 					tokens.increment(false);
 					tokens.expect<node>();
 
-					while (tokens.decrement(__FILE__, __LINE__, data)) {
+					while (tokens.decrement(__FILE__, __LINE__)) {
 						arbiter.push_back(node(tokens, data));
 
 						tokens.increment(false);
 						tokens.expect<node>();
 					}
 
-					if (tokens.decrement(__FILE__, __LINE__, data)) {
+					if (tokens.decrement(__FILE__, __LINE__)) {
 						tokens.next();
 					}
 				} else if (tokens.found("end")) {
@@ -277,7 +277,7 @@ void graph::parse(tokenizer &tokens, void *data) {
 	tokens.syntax_end(this);
 }
 
-bool graph::is_next(tokenizer &tokens, int i, void *data) {
+bool graph::is_next(tokenizer &tokens, int i, std::any data) {
 	while (tokens.is_next("\n", i)) {
 		i++;
 	}

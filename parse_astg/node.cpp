@@ -11,7 +11,7 @@ node::node() {
 	place = "";
 }
 
-node::node(tokenizer &tokens, void *data) {
+node::node(tokenizer &tokens, std::any data) {
 	debug_name = "astg_node";
 	place = "";
 	parse(tokens, data);
@@ -34,14 +34,14 @@ node::node(string place, string id) {
 node::~node() {
 }
 
-void node::parse(tokenizer &tokens, void *data) {
+void node::parse(tokenizer &tokens, std::any data) {
 	tokens.syntax_start(this);
 
 	tokens.increment(true);
 	string peek = tokens.peek(1);
-	bool is_place = (peek.size() > 0 && peek[0] == 'p');
-	for (int i = 1; i < (int)peek.size() && is_place; i++)
-		if (peek[i] < '0' || peek[i] > '9')
+	bool is_place = (peek.size() > 0 and peek[0] == 'p');
+	for (int i = 1; i < (int)peek.size() and is_place; i++)
+		if (peek[i] < '0' or peek[i] > '9')
 			is_place = false;
 
 	if (peek == "skip")
@@ -57,37 +57,37 @@ void node::parse(tokenizer &tokens, void *data) {
 		tokens.expect<expression>();
 	}
 
-	if (tokens.decrement(__FILE__, __LINE__, data))
+	if (tokens.decrement(__FILE__, __LINE__))
 	{
 		if (tokens.found("skip")) {
 			tokens.next();
 		} else if (tokens.found<expression>()) {
-			guard = expression(tokens, 0, data);
+			guard = expression(tokens, data);
 
-			if (tokens.decrement(__FILE__, __LINE__, data))
+			if (tokens.decrement(__FILE__, __LINE__))
 				tokens.next();
 
-			if (tokens.decrement(__FILE__, __LINE__, data)) {
+			if (tokens.decrement(__FILE__, __LINE__)) {
 				if (tokens.found("skip")) {
 					tokens.next();
 				} else {
-					assign = composition(tokens, 0, data);
+					assign = composition(tokens, data);
 				}
 			}
-		} else if (is_place && tokens.found<parse::instance>()) {
+		} else if (is_place and tokens.found<parse::instance>()) {
 			place = tokens.next();
 		}
 
 		tokens.increment(false);
 		tokens.expect("/");
 
-		if (tokens.decrement(__FILE__, __LINE__, data)) {
+		if (tokens.decrement(__FILE__, __LINE__)) {
 			tokens.next();
 
 			tokens.increment(true);
 			tokens.expect<parse::number>();
 
-			if (tokens.decrement(__FILE__, __LINE__, data))
+			if (tokens.decrement(__FILE__, __LINE__))
 				id = tokens.next();
 		}
 	}
@@ -95,13 +95,12 @@ void node::parse(tokenizer &tokens, void *data) {
 	tokens.syntax_end(this);
 }
 
-bool node::is_next(tokenizer &tokens, int i, void *data) {
-	return (tokens.is_next("skip") || expression::is_next(tokens, i, data) || parse::instance::is_next(tokens, i, data));
+bool node::is_next(tokenizer &tokens, int i, std::any data) {
+	return (tokens.is_next("skip") or expression::is_next(tokens, i, data) or parse::instance::is_next(tokens, i, data));
 }
 
 void node::register_syntax(tokenizer &tokens) {
 	if (!tokens.syntax_registered<node>()) {
-		setup_expressions();
 		tokens.register_syntax<node>();
 		composition::register_syntax(tokens);
 		expression::register_syntax(tokens);
@@ -112,7 +111,7 @@ void node::register_syntax(tokenizer &tokens) {
 
 string node::to_string(string tab) const {
 	string result = "";
-	if (guard.valid && assign.valid) {
+	if (guard.valid and assign.valid) {
 		result += guard.to_string(tab) + "->" + assign.to_string(tab);
 	} else if (guard.valid) {
 		result += guard.to_string(tab) + "->skip";

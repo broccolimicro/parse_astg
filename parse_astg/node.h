@@ -10,7 +10,7 @@ namespace parse_astg
 struct node : parse::syntax
 {
 	node();
-	node(tokenizer &tokens, void *data = NULL);
+	node(tokenizer &tokens, std::any data=std::any());
 	node(expression guard, composition assign, string id = "");
 	node(string place, string id = "");
 	~node();
@@ -20,8 +20,8 @@ struct node : parse::syntax
 	string place;
 	string id;
 
-	void parse(tokenizer &tokens, void *data = NULL);
-	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
+	void parse(tokenizer &tokens, std::any data=std::any());
+	static bool is_next(tokenizer &tokens, int i = 1, std::any data=std::any());
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;
