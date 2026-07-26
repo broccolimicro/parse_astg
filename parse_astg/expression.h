@@ -3,6 +3,8 @@
 #include <parse_expression/expression.h>
 #include <parse_expression/assignment.h>
 #include <parse_expression/wrapper.h>
+#include <parse_expression/literal.h>
+#include <parse/wrapper.h>
 
 namespace parse_astg {
 
@@ -26,6 +28,12 @@ struct composition_config {
 	composition_config();
 	~composition_config();
 };
+
+using constant = parse_expression::default_constant;
+using literal = parse_expression::default_literal;
+using type_name = parse::wrapper<parse::instance>;
+using term_name = parse::wrapper<parse::instance>;
+using label = parse::wrapper<parse::number>;
 
 using lvalue = parse_expression::lvalue<expression_config>;
 using expression = parse_expression::rvalue<expression_config>;

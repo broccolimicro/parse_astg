@@ -29,7 +29,7 @@ parse_expression::config makeExprConfig() {
 	parse_expression::config cfg;
 	int CONSTANT = cfg.push<parse_expression::default_constant>("constant");
 	int LITERAL = cfg.push<parse_expression::default_literal>("literal");
-	int TYPE = cfg.push<parse::wrapper<parse::instance> >("type");
+	/*int TYPE = */cfg.push<parse::wrapper<parse::instance> >("type");
 	int TERM = cfg.push<parse::wrapper<parse::instance> >("term");
 	int LABEL = cfg.push<parse::wrapper<parse::number> >("label");
 
@@ -37,8 +37,8 @@ parse_expression::config makeExprConfig() {
 
 	using operation_set=parse_expression::operation_set;
 
-	cfg.order.push(operation_set::TERNARY);
-	cfg.order.push_back("", "?", ":", "");
+	/*cfg.order.push(operation_set::TERNARY);
+	cfg.order.push_back("", "?", ":", "");*/
 
 	cfg.order.push(operation_set::BINARY);
 	cfg.order.push_back("", "", "|", "");
@@ -97,8 +97,8 @@ parse_expression::config makeExprConfig() {
 	cfg.order.push_back("", ".", "", "", {LITERAL}, {LABEL});
 	cfg.order.push_back("", "[", ":", "]");
 
-	cfg.order.push(operation_set::MODIFIER);
-	cfg.order.push_back("", "::", "", "", {TYPE}, {LABEL});
+	/*cfg.order.push(operation_set::MODIFIER);
+	cfg.order.push_back("", "::", "", "", {TYPE}, {LABEL});*/
 
 	cfg.order.push(operation_set::GROUP);
 	cfg.order.push_back("[", "", ",", "]");
