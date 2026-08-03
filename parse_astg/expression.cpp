@@ -27,11 +27,10 @@ composition_config::~composition_config() {
 
 parse_expression::config makeExprConfig() {
 	parse_expression::config cfg;
-	int CONSTANT = cfg.push<parse_expression::default_constant>("constant");
-	int LITERAL = cfg.push<parse_expression::default_literal>("literal");
-	/*int TYPE = */cfg.push<parse::wrapper<parse::instance> >("type");
-	int TERM = cfg.push<parse::wrapper<parse::instance> >("term");
-	int LABEL = cfg.push<parse::wrapper<parse::number> >("label");
+	int CONSTANT = cfg.push<constant>("constant");
+	int LITERAL = cfg.push<literal>("literal");
+	int LABEL = cfg.push<label>("label");
+	int IDENT = cfg.push<ident>("ident");
 
 	cfg.base = {LITERAL, CONSTANT};
 
@@ -89,16 +88,16 @@ parse_expression::config makeExprConfig() {
 	cfg.set_lvalue();
 
 	cfg.order.push(operation_set::MODIFIER);
-	cfg.order.push_back("", "'", "", "", {LITERAL}, {LABEL});
+	cfg.order.push_back("", "'", "", "", {IDENT});
 
 	cfg.order.push(operation_set::MODIFIER);
 	//cfg.order.push_back("", "{", ",", "}");
-	cfg.order.push_back("", "(", ",", ")", {TERM});
-	cfg.order.push_back("", ".", "", "", {LITERAL}, {LABEL});
+	cfg.order.push_back("", "(", ",", ")");
+	cfg.order.push_back("", ".", "", "", {LABEL});
 	cfg.order.push_back("", "[", ":", "]");
 
 	/*cfg.order.push(operation_set::MODIFIER);
-	cfg.order.push_back("", "::", "", "", {TYPE}, {LABEL});*/
+	cfg.order.push_back("", "::", "", "", {LABEL});*/
 
 	cfg.order.push(operation_set::GROUP);
 	cfg.order.push_back("[", "", ",", "]");
