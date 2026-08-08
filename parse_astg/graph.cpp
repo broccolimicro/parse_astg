@@ -298,6 +298,7 @@ void graph::register_syntax(tokenizer &tokens) {
 		tokens.register_syntax<graph>();
 		arc::register_syntax(tokens);
 		node::register_syntax(tokens);
+		lvalue::register_syntax(tokens);
 		tokens.register_token<parse::instance>();
 		tokens.register_token<parse::symbol>();
 		tokens.register_token<parse::number>();

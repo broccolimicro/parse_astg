@@ -57,6 +57,15 @@ void node::parse(tokenizer &tokens, std::any data) {
 		tokens.expect<expression>();
 	}
 
+	if (not is_place) {
+		tokens.increment(true);
+		tokens.expect("{");
+
+		if (tokens.decrement(__FILE__, __LINE__)) {
+			tokens.next();
+		}
+	}
+
 	if (tokens.decrement(__FILE__, __LINE__))
 	{
 		if (tokens.found("skip")) {
@@ -81,14 +90,24 @@ void node::parse(tokenizer &tokens, std::any data) {
 		tokens.increment(false);
 		tokens.expect("/");
 
+		if (not is_place) {
+			tokens.increment(true);
+			tokens.expect("}");
+
+			if (tokens.decrement(__FILE__, __LINE__)) {
+				tokens.next();
+			}
+		}
+
 		if (tokens.decrement(__FILE__, __LINE__)) {
 			tokens.next();
 
 			tokens.increment(true);
 			tokens.expect<parse::number>();
 
-			if (tokens.decrement(__FILE__, __LINE__))
+			if (tokens.decrement(__FILE__, __LINE__)) {
 				id = tokens.next();
+			}
 		}
 	}
 
@@ -96,7 +115,7 @@ void node::parse(tokenizer &tokens, std::any data) {
 }
 
 bool node::is_next(tokenizer &tokens, int i, std::any data) {
-	return (tokens.is_next("skip") or expression::is_next(tokens, i, data) or parse::instance::is_next(tokens, i, data));
+	return (tokens.is_next("{", i) or tokens.is_next<parse::instance>(i));
 }
 
 void node::register_syntax(tokenizer &tokens) {
@@ -112,13 +131,13 @@ void node::register_syntax(tokenizer &tokens) {
 string node::to_string(string tab) const {
 	string result = "";
 	if (guard.valid and assign.valid) {
-		result += guard.to_string(tab) + "->" + assign.to_string(tab);
+		result += "{" + guard.to_string(tab) + "->" + assign.to_string(tab) + "}";
 	} else if (guard.valid) {
-		result += guard.to_string(tab) + "->skip";
+		result += "{" + guard.to_string(tab) + "->skip}";
 	} else if (place != "") {
 		result += place;
 	} else {
-		result += "skip";
+		result += "{skip}";
 	}
 
 	if (id != "") {
